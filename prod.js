@@ -236,6 +236,45 @@ function snowman(t){
     return stuff;
 }
 
+function drawRoots(t){
+
+    var container = {
+        f : [],
+        o : [],
+        c: []
+    };
+
+    var black=
+        [ .01, .02, .05, 1,
+          .02, .04, .05, 1,
+          .6,  .3,  .1,  2,
+           0,   0,   0,  0  ];
+
+           var clr=
+        [ .1,  .12, .05, 1, // ambient
+          .2,  .4,  .5,  1, // diffuse
+          .1,  .1,  .1,  1, // specular + shininess
+           0,   0,   0,  0  // control
+        ];
+
+        container.c.push({
+            f: [translate_wi(-1,2,0), scale_wi(.1)],
+            o: [new Material(clr), objBall],
+            c : []
+            });
+
+            // Here we need randomization for creating varied root structures
+
+            container.c.push({
+                    f : [translate_wi(-t,2,0)],
+                    o : [objBall],
+                    //Here first use for randomization?
+                    c : []
+                });
+
+    return container;
+}
+
 /** 
  * Example of a function that returns a diffuse non-shiny basic coloring
  * compatible with the Vanilla 1.4 shader
@@ -270,6 +309,7 @@ function buildSceneAtTime(t){
     // Build animated contents step by step, in subgraphs
     var player_one = snowman(2*t);
     var player_two = snowman(2*t + 2);
+    var oma = drawRoots(t);
     var parivaljakko = {f:[],o:[],c:[
         {f:[translate_wi(5,0,0),  rotY_wi(1.6)],  o:[], c:[player_one]},
         {f:[translate_wi(-5,0,0), rotY_wi(-1.6)], o:[], c:[player_two]}
@@ -283,6 +323,8 @@ function buildSceneAtTime(t){
 
     // Names can be given to any nuts or bolts, to help you animate and manage your scene:
     var parivaljakon_sijainti = [translate_wi(0,-3,0)];
+
+    var oma_sij = [translate_wi(0,-3,0)];
 
     var ctausta=
         [.1, .1, .2, 1,
@@ -318,6 +360,9 @@ function buildSceneAtTime(t){
                               {f:parivaljakon_sijainti,
                                o:[],
                                c:[parivaljakko]},
+                               {f:oma_sij,
+                                o : [],
+                                c : [oma]},
 
                               {f:[scaleXYZ_wi(3,3,3)],
                                o:[],
