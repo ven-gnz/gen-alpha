@@ -52,7 +52,7 @@ http://sb.bitsnbites.eu/?data=U0JveAwC7dk9SgNBGAbgd2MS0MKfSsvFnELwOJZCGhsRJN0SEi
 // Global variables that you MUST define - they are used by the library code:
 
 /** Song tempo; the library computes time in beats for easy sync. */
-var songBeatsPerMinute = 116;
+var songBeatsPerMinute = 240;
 
 /** 
  * Frame producer function must be selected; this tutorial example depends on
@@ -87,6 +87,13 @@ var clearColor = [0,0,0,1];
 // global so they are available in your draw function below:
 
 var objTile, objBackground, objBall;
+
+var brown=
+[ .5, .02, .05, 1,
+  .02, .75, .05, 1,
+  .0,  .0,  .1,  2,
+   0,   0,   0,  0  ];
+
 
 // ----------------------------------------------------------------------------
 /**
@@ -123,17 +130,8 @@ function initAssets(){
 }
 
 
-/**
- * Example of how you can structure your scene graph using functions that build
- * sub-graphs. Use names that are relevant to your production. Function
- * "snowman" builds a snowman for example. If you build a squirrel, you can call
- * the function "squirrel".
- *
- * Pro tip: Create meaningful and named parameters, too. Here, "handwave_amount"
- * would have been better than "t" etc. Do better than these examples..
- *
- */
-function snowman(t){
+
+ 
 
     /**
      * Example of a scene graph node. If you have any experience with JSON,
@@ -155,125 +153,126 @@ function snowman(t){
      *   "c" stands for Children: a list of nodes that will be processed after
      *   applying "f" and drawing "o". If you have been wondering what recursive
      *   processing means, then here is a good example about it.
-     *
-     * All the lists f, o, and c must always exist (or there will be a runtime
-     * error and crash) but any can be empty, marked with empty braces []. An
-     * empty list just means that the particular processing step is not relevant
-     * for that node.
-     *
-     * The current library version uses property "r" for special uses, but it is
-     * not mandatory, and will be explained later, on a need-to-know basis.
-     */
-    var stuff = {
-        f: [],
-        o: [],
-        c: []
-    };
-
-    /**
-     * An example of a 4x4 matrix that is used in the default shading model
-     * (currently the best one available; calendar looks a bit so-so whether new
-     * models are coming at Instanssi 2024 or must be left to later time):
+  
      *
      * First row:  [ Ambient  R,G,B = base color in shadowed region,      (unused) ]
      * Second row: [ Diffuse  R,G,B = diffuse reflectance in lit region,  (unused) ]
      * Third row:  [ Specular R,G,B = specular 'shiny' reflectance,      shininess ]
      * Fourth row: [ (unused), (unused), (unused), mesh brightness ]
-     * 
-     * I suppose shininess needs to be larger than 0. Unused ones can be anything,
-     * they are unfortunate noise for our 4k.
-     */
-    var clr=
-        [ .1,  .12, .05, 1, // ambient
-          .2,  .4,  .5,  1, // diffuse
-          .1,  .1,  .1,  1, // specular + shininess
-           0,   0,   0,  0  // control
-        ];
+   
 
-    // A black kind of color with a reddish "glow" using specular color
-    var black=
-        [ .01, .02, .05, 1,
-          .02, .04, .05, 1,
-          .6,  .3,  .1,  2,
-           0,   0,   0,  0  ];
+*/
+  
 
-    // We made an empty node called "stuff", but now we start using it as a container
-    // of more stuff, and do this by pushing new nodes in its child list:
-    stuff.c.push({f: [translate_wi(0,1,0)],
-                  o: [new Material(clr), objBall],
-                  c: []
-                 });
 
-    // You can use such pushing for example for pushing multiple nodes in a for-loop ...
+function drawLeaf(rotation, leaf, depth, length, thickness){
 
-    // Pushing one-by-one makes it possible to manage combining parts without getting
-    // into kilometer-deep and wide JSON structures that make you sick and get out of hands.
+    if(depth === 0){
+        return
+    }
 
-    stuff.c.push({f: [translate_wi(0,2,0), scale_wi(.7)],
-                  o: [new Material(clr), objBall],
-                  c: [
-                      {f: [rotY_wi(.2), rotZ_wi(.4*Math.sin(.8*t)), translate_wi(1,0,0), scaleXYZ_wi(.8,.3,.3)],
-                       o: [objBall],
-                       c: []},
-                      {f: [rotY_wi(-.2), rotX_wi(.4*Math.sin(.06*t)),rotZ_wi(3.14-.4*Math.sin(.1*t)), translate_wi(1,0,0), scaleXYZ_wi(.8,.3,.3)],
-                       o: [objBall],
-                       c: []}
-                     ]
-                 });
-    
-    stuff.c.push({f: [translate_wi(0,3,0), scale_wi(.4), rotX_wi(-.3)],
-                  o: [new Material(clr), objBall],
-                  c: [{f: [translate_wi(0,.5,0), scaleXYZ_wi(1.5,.2,1.5)],
-                       o: [new Material(black), objBall],
-                       c: []
-                      },
-                      {f: [translate_wi(0,.2,0), scaleXYZ_wi(.9,1,.9)],
-                       o: [new Material(black), objBall],
-                       c: []
-                      }
-                     ]
-                 });
-    return stuff;
+    var rightLeaf = {
+        f : [rotZ_wi(-rotation*3.14/180),translate_wi(0,length,0)],
+        o : [],
+        c : ({
+            f : [scaleXYZ_wi(thickness,length,thickness)],
+            o : [new Material(brown),objBall],
+            c : []
+        })
+    };
+
+    var leftLeaf = {
+        f : [rotZ_wi(rotation*3.14/180),translate_wi(0,length,0)],
+        o : [],
+        c : ({
+            f : [scaleXYZ_wi(thickness,length,thickness)],
+            o : [new Material(brown),objBall],
+            c : []
+        })
+    };
+
+    leaf.c.push(rightLeaf,leftLeaf)
+    drawLeaf(rotation,leftLeaf,depth-1,length,thickness)
+    drawLeaf(rotation,rightLeaf,depth-1,length,thickness)
+
 }
 
-function drawRoots(t){
+function drawRootsRecur(rotation,root,depth,length,thickness){
 
-    var container = {
+    if (depth === 0) {
+        return
+    }
+
+    var rightnode = {
+        f : [rotZ_wi(-rotation*3.14/180),translate_wi(0,-length,0)],
+        o : [],
+        c : [{
+            f : [ scaleXYZ_wi(thickness, length, thickness)],
+            o : [new Material(brown),objBall],
+            c : []
+        }]
+    };
+
+        var leftnode = {
+            f : [rotZ_wi(rotation*3.14/180),translate_wi(0,-length,0)],
+            o : [],
+            c : [{
+                f : [ scaleXYZ_wi(thickness, length, thickness)],
+                o : [new Material(brown),objBall],
+                c : []
+            }]
+        };
+
+        root.c.push(leftnode,rightnode)
+        drawRootsRecur(rotation,leftnode,depth-1,length,thickness)
+        drawRootsRecur(rotation,rightnode,depth-1,length,thickness)
+
+}
+
+function drawTree(t){
+
+    var trunkHeight = .1*t > 4.5 ? 4.5 : .1*t;
+    var trunkThickness = .05*t > 1.5 ? 1.5 : .05*t;
+
+    var puu = {
         f : [],
         o : [],
         c: []
     };
 
-    var black=
-        [ .01, .02, .05, 1,
-          .02, .04, .05, 1,
-          .6,  .3,  .1,  2,
-           0,   0,   0,  0  ];
+    var siemen = {
+        f : [translate_wi(0,0,0)],
+        o : [new Material(brown),objBall],
+        c : []
+    }
+    var runko = {
+        f : [translate_wi(0,0.75,0),scaleXYZ_wi(trunkThickness,trunkHeight,trunkThickness)],
+        o : [new Material(brown),objTile],
+        c : []
+    }
 
-           var clr=
-        [ .1,  .12, .05, 1, // ambient
-          .2,  .4,  .5,  1, // diffuse
-          .1,  .1,  .1,  1, // specular + shininess
-           0,   0,   0,  0  // control
-        ];
+        var rootThickness = 0.01*t > 0.15 ? 0.15 : .01*t;
+        var rootLength = 0.25*t > 1.75 ? 1.75 : 0.25*t;
 
-        container.c.push({
-            f: [translate_wi(-1,2,0), scale_wi(.1)],
-            o: [new Material(clr), objBall],
-            c : []
-            });
+        var rootDepth = t / 5;
+        var maxDepth = Math.floor(rootDepth) > 5 ? 5 : Math.floor(rootDepth);
 
-            // Here we need randomization for creating varied root structures
+        var ro = {f : [], o : [], c : []};
+        drawRootsRecur(17.5,ro,maxDepth,rootLength,rootThickness);
 
-            container.c.push({
-                    f : [translate_wi(-t,2,0)],
-                    o : [objBall],
-                    //Here first use for randomization?
-                    c : []
-                });
+        var leaf = {f : [], o : [], c : []};
 
-    return container;
+        drawLeaf(33.3,leaf,2,trunkHeight,0.2)
+        
+        
+        puu.c.push(siemen);
+        puu.c.push(runko);
+        puu.c.push(leaf);
+        puu.c.push(ro);
+
+    return puu;
 }
+
 
 /** 
  * Example of a function that returns a diffuse non-shiny basic coloring
@@ -307,13 +306,8 @@ function buildSceneAtTime(t){
     var sceneroot = {f:[],o:[],c:[]};
 
     // Build animated contents step by step, in subgraphs
-    var player_one = snowman(2*t);
-    var player_two = snowman(2*t + 2);
-    var oma = drawRoots(t);
-    var parivaljakko = {f:[],o:[],c:[
-        {f:[translate_wi(5,0,0),  rotY_wi(1.6)],  o:[], c:[player_one]},
-        {f:[translate_wi(-5,0,0), rotY_wi(-1.6)], o:[], c:[player_two]}
-    ]}
+ 
+    var puu = drawTree(t);
 
     // Generating colors can be put into functions just like anything - for convenience and brevity
     var cpohja = basic_color(.9, .6, .4);
@@ -322,9 +316,6 @@ function buildSceneAtTime(t){
     var cloota = basic_color(.2, .5 + Math.sin(t), .4);
 
     // Names can be given to any nuts or bolts, to help you animate and manage your scene:
-    var parivaljakon_sijainti = [translate_wi(0,-3,0)];
-
-    var oma_sij = [translate_wi(0,-3,0)];
 
     var ctausta=
         [.1, .1, .2, 1,
@@ -349,20 +340,11 @@ function buildSceneAtTime(t){
     sceneroot.c.push({f:[],
                       o:[],
                       c:[
-                              {f:[translate_wi(0,-3,0), scaleXYZ_wi(60,.2,60)],
-                               o:[new Material(cpohja), objTile],
-                               c:[]},
 
-                              {f:[translate_wi(0,lootakorkeus,0), scaleXYZ_wi(2,2,2)],
-                               o:[new Material(cloota), objTile],
-                               c:[]},
-
-                              {f:parivaljakon_sijainti,
-                               o:[],
-                               c:[parivaljakko]},
-                               {f:oma_sij,
-                                o : [],
-                                c : [oma]},
+                                {   f: [],
+                                    o : [],
+                                    c : [puu]
+                                    },
 
                               {f:[scaleXYZ_wi(3,3,3)],
                                o:[],
@@ -370,7 +352,7 @@ function buildSceneAtTime(t){
                               },
                                 
                               // The scene must have exactly one Camera. It doesn't work without.
-                              {f:[translate_wi(0,3,0), rotY_wi(t/3), translate_wi(0,0,30), rotX_wi(.2)],
+                              {f:[translate_wi(0,10,0), rotY_wi(0), translate_wi(0,0,45), rotX_wi(0.2)],
                                o:[],
                                c:[],
                                r:[new Camera()]
@@ -386,28 +368,13 @@ function buildSceneAtTime(t){
                         ]
                     }
                     );
-
+    
     return sceneroot;
 }
 
 
-
-
-// -----------------------------------------------------------------------------
-
-/**
- * (Optionally) initialize additional HTML and CSS parts of the
- * document. This can be used, for example, for scrolling or flashing
- * text shown as usual HTML or hypertext. Not often used in actual
- * demoscene productions.
- */
 function initDocument(){
 }
 
-/**
- * (Optionally) update the HTML and CSS parts of the document. This
- * can be used for scrolling or flashing text shown as usual HTML. Not
- * often used in actual demoscene productions.
- */
 function updateDocument(t){
 }

@@ -5,13 +5,13 @@
 ## Change these to match your own production:
 
 # A short name of the production, used in generated file names (don't use spaces!)
-PROD_NAME=example
+PROD_NAME=gen-alpha
 
 # A "full" name of the production, used in zip package name (don't use spaces!)
-PROD_NAME_FULL=Example_4k
+PROD_NAME_FULL=gen-alpha
 
 # Your handle/nickname, also included in the zip package name (don't use spaces!)
-PROD_AUTHOR=The_Old_Dude
+PROD_AUTHOR=ven-gnz
 
 ## Change these to match your local installation directories...
 #
