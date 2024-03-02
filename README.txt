@@ -1,9 +1,6 @@
-4k Workshop Entry
+4k Workshop Entry - gen-alpha
 ===================
 
-
-A very small example that you can examine and modify to build your
-very first browser 4k intro.
 
 Author:     ven-gnz
 

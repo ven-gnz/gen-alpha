@@ -40,7 +40,7 @@
           3 // FX_DELAY_TIME
           ],
           // Patterns
-          p: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+          p: [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
           // Columns
           c: [
             {n: [],
@@ -82,7 +82,7 @@
           12 // FX_DELAY_TIME
           ],
           // Patterns
-          p: [,,,,2,3,4,5,2,2,4,5,6],
+          p: [,,,,2,3,4,5,2,2,4,5,3,3,4,5,3,3,4,5,6],
           // Columns
           c: [
             {n: [],
@@ -132,7 +132,7 @@
           0 // FX_DELAY_TIME
           ],
           // Patterns
-          p: [,,1,1,1,1,1,1,1,1,1,1,1,1],
+          p: [,,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
           // Columns
           c: [
             {n: [136,,,,136,,,,136,,,,136,,,,136,,,,136,,,,136,,,,136],
@@ -142,6 +142,6 @@
       ],
       rowLen: 2756,   // In sample lengths
       patternLen: 32,  // Rows per pattern
-      endPattern: 14,  // End pattern
+      endPattern: 22,  // End pattern
       numChannels: 3  // Number of channels
     };
