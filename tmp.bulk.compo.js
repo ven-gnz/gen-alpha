@@ -2367,9 +2367,9 @@ var applescale;
 // Fourth row: [ (unused), (unused), (unused), mesh brightness ]
 
 var brown=
-[ .54, .36, .31, 1,
-  .02, .75, .25, 1,
-  .54,  .36,  .31,  2,
+[ .29, .19, .18, 1,
+  .29, .18, .25, 1,
+  .29,  .19,  .18,  2,
    0,   0,   0,  0  ];
 
    var green=[
@@ -2406,7 +2406,7 @@ function initAssets(){
                                new funCircle(0,32));
 
                                 apple = {
-                                f : [scaleXYZ_wi(0.33,0.33,0.33)],
+                                f : [scaleXYZ_wi(0.3,0.3,0.3)],
                                 o : [new Material(red),objBall],
                                 c : []
                             }
@@ -2420,25 +2420,31 @@ function drawLeaf(rotation, leaf, depth, length, thickness,t){
     }
 
     var color = depth === 1 ? Defaultcolor : brown
+    var thickness = color === green ? thickness+0.8 : thickness
+    var length = color === green ? length-0.2 : length
+    var offset = color === green ? 0.2 : 0
+
 
     var rightleaf = {
-        f : [rotZ_wi(-rotation*3.14/180),translate_wi(0,length,0)],
+        f : [rotZ_wi(-rotation*3.14/180),translate_wi(0,length,offset)],
         o : [],
         c : [{
-            f : [ scaleXYZ_wi(thickness, length, thickness)],
+            f : [ scaleXYZ_wi(thickness*depth/4, length, thickness*depth/4)],
             o : [new Material(color),objBall],
             c : []
         }]
     };
+
     if(depth === 1 && Defaultcolor === green && t >= 96){
         rightleaf.c.push(apple)
-    }
+}
+    
 
     var leftleaf = {
-        f : [rotZ_wi(rotation*3.14/180),translate_wi(0,length,0)],
+        f : [rotZ_wi(rotation*3.14/180),translate_wi(offset,length,0)],
         o : [],
         c : [{
-            f : [ scaleXYZ_wi(thickness, length, thickness)],
+            f : [ scaleXYZ_wi(thickness*depth/4, length, thickness*thickness/4)],
             o : [new Material(color),objBall],
             c : []
         }]
@@ -2452,8 +2458,12 @@ function drawLeaf(rotation, leaf, depth, length, thickness,t){
 
 function drawTree(t){
 
-    var trunkHeight = .1*t > 5.5 ? 5.5 : .1*t;
-    var trunkThickness = .05*t > 1.75 ? 1.75 : .05*t;
+    var trunkHeight = 0
+    var trunkThickness = 0
+    if(t > 32){
+    var trunkHeight = .066*(t-24) > 3 ? 3 : .066*(t-24);
+    var trunkThickness = .05*(t-24) > 1.75 ? 1.75 : .05*(t-24);
+    }
 
     var growthFactor = t / 4;
 
@@ -2474,7 +2484,7 @@ function drawTree(t){
         c : []
     }
     
-        var rootThickness = 0.01*t > 0.15 ? 0.15 : .01*t;
+        var rootThickness = 0.01*t > 0.1 ? 0.1 : .01*t;
         var rootLength = 0.25*t > 1.75 ? 1.75 : 0.25*t;
 
         var maxrootDepth = Math.floor(growthFactor) > 7 ? 7 : Math.floor(growthFactor);
@@ -2488,13 +2498,14 @@ function drawTree(t){
         var leaves = {f : [], o : [], c : []};
         var leafDepth = 1
             
-        var leafgrowthfactor = t/3 - 14
-        var maxleafLength = leafgrowthfactor > 1.25 ? 1.25 : leafgrowthfactor
+        var leafgrowthfactor = t/5 - 7
+        var maxleafLength = leafgrowthfactor > 1.1 ? 1.1 : leafgrowthfactor
 
         if(leafgrowthfactor > 0){
             Defaultcolor = green;
             leafDepth = Math.floor(leafgrowthfactor) > 9 ? 9 : Math.floor(leafgrowthfactor)
-            drawLeaf(17.5,leaves,leafDepth,maxleafLength,0.15,t)
+            
+            drawLeaf(15,leaves,leafDepth,maxleafLength,0.07,t)
         }
 
         puu.c.push(siemen);
@@ -2521,9 +2532,6 @@ function buildSceneAtTime(t){
     
     var sceneroot = {f:[],o:[],c:[]};
     var endroot = {f:[],o:[],c:[]}
-    if(t > 97){
-        applescale = 0.25
-    }
  
     var puu = drawTree(t);
 
