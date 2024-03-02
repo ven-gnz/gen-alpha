@@ -2417,28 +2417,15 @@ var brown=
   .0,  .0,  .1,  2,
    0,   0,   0,  0  ];
 
+   var green=[
+   .15, .02, .05, 1,
+  .02, 1, .05, 1,
+  .0,  .0,  .22,  2,
+   0,   0,   0,  0 
+   ]
 
-// ----------------------------------------------------------------------------
-/**
- * Initialize the constant and pre-computed "assets" used in your own
- * production; the library calls this function once before entering the main
- * loop.
- *
- * Things like graphics primitives / building blocks can be generated
- * here. Basically anything that you want to compute once, before the
- * show starts. Due to the current library workings, this includes all
- * shapes that you're going to use - modifying shapes on-the-fly is not
- * yet supported.
- */
 function initAssets(){
-    // The library provides some elementary ways to create shapes, as per
-    // the MIT OCW first course in computer graphics that was its inspiration.
-    // Once a shape is created, any number of transformed copies can be placed
-    // in the scene.
-
-    // Here, we create the most elementary of the elementary building blocks as
-    // an example: the box and the ball.
-
+  
     // Now there is a box shape available in the library:
     objTile = new Box(1);
 
@@ -2494,29 +2481,31 @@ function drawLeaf(rotation, leaf, depth, length, thickness){
         return
     }
 
-    var rightLeaf = {
+    var color = depth === 1 ? green : brown
+
+    var rightleaf = {
         f : [rotZ_wi(-rotation*3.14/180),translate_wi(0,length,0)],
         o : [],
-        c : ({
-            f : [scaleXYZ_wi(thickness,length,thickness)],
-            o : [new Material(brown),objBall],
+        c : [{
+            f : [ scaleXYZ_wi(thickness, length, thickness)],
+            o : [new Material(color),objBall],
             c : []
-        })
+        }]
     };
 
-    var leftLeaf = {
+    var leftleaf = {
         f : [rotZ_wi(rotation*3.14/180),translate_wi(0,length,0)],
         o : [],
-        c : ({
-            f : [scaleXYZ_wi(thickness,length,thickness)],
-            o : [new Material(brown),objBall],
+        c : [{
+            f : [ scaleXYZ_wi(thickness, length, thickness)],
+            o : [new Material(color),objBall],
             c : []
-        })
-    };
+        }]
+    }
 
-    leaf.c.push(rightLeaf,leftLeaf)
-    drawLeaf(rotation,leftLeaf,depth-1,length,thickness)
-    drawLeaf(rotation,rightLeaf,depth-1,length,thickness)
+   leaf.c.push(leftleaf,rightleaf)
+    drawLeaf(rotation,leftleaf,depth-1,length,thickness)
+    drawLeaf(rotation,rightleaf,depth-1,length,thickness)
 
 }
 
@@ -2525,6 +2514,7 @@ function drawRootsRecur(rotation,root,depth,length,thickness){
     if (depth === 0) {
         return
     }
+
 
     var rightnode = {
         f : [rotZ_wi(-rotation*3.14/180),translate_wi(0,-length,0)],
@@ -2554,7 +2544,7 @@ function drawRootsRecur(rotation,root,depth,length,thickness){
 
 function drawTree(t){
 
-    var trunkHeight = .1*t > 4.5 ? 4.5 : .1*t;
+    var trunkHeight = .1*t > 5.5 ? 5.5 : .1*t;
     var trunkThickness = .05*t > 1.5 ? 1.5 : .05*t;
 
     var puu = {
@@ -2577,20 +2567,30 @@ function drawTree(t){
         var rootThickness = 0.01*t > 0.15 ? 0.15 : .01*t;
         var rootLength = 0.25*t > 1.75 ? 1.75 : 0.25*t;
 
-        var rootDepth = t / 5;
-        var maxDepth = Math.floor(rootDepth) > 5 ? 5 : Math.floor(rootDepth);
+        var growthFactor = t / 4;
+        var maxDepth = Math.floor(growthFactor) > 7 ? 7 : Math.floor(growthFactor);
 
         var ro = {f : [], o : [], c : []};
         drawRootsRecur(17.5,ro,maxDepth,rootLength,rootThickness);
 
-        var leaf = {f : [], o : [], c : []};
+        var le = {f : [], o : [], c : []};
+        var leafDepth = 1
+            
+        var leafGrowthFactor = t/3 - 20
 
-        drawLeaf(33.3,leaf,2,trunkHeight,0.2)
+        if(leafGrowthFactor > 0){
+            leafDepth = Math.floor(leafGrowthFactor) > 8 ? 8 : Math.floor(leafGrowthFactor)
+            drawLeaf(17.5,le,leafDepth,rootLength*0.75,0.2)
+        }
+
         
+
+        
+        console.log(leafGrowthFactor)
         
         puu.c.push(siemen);
         puu.c.push(runko);
-        puu.c.push(leaf);
+        puu.c.push(le);
         puu.c.push(ro);
 
     return puu;
@@ -2652,13 +2652,6 @@ function buildSceneAtTime(t){
         c:[]
     };
 
-    var lootakorkeus = Math.min(-7 + t/4, 3);
-
-    // At times, surplus complexity tends to appear, and it could be refactored away.
-    // For example, the following code pushes a useless node with children that could have
-    // been pushed one-by-one more cleanly. Or, actually, the empty root node did not need
-    // to be created in the first place... silly me... but this makes an instructional
-    // example, so leave it like this.. 
 
     sceneroot.c.push({f:[],
                       o:[],
