@@ -64,9 +64,11 @@ var brown=
    ];
 
    var Defaultcolor = brown;
-
-   
-
+   var maxlength = 1.0;
+   var minlength = 0.1;
+   var len = 0;
+   var initdepth = 0;
+   var snipper = 4;
 
 function initAssets(){
   
@@ -90,23 +92,25 @@ function initAssets(){
 
 }
 
-function drawLeaf(rotation, leaf, depth, length, thickness,t){
+function drawLeaf(rotation, leaf, depth, length, maxlength, thickness,t){
 
     if(depth === 0){
         return
     }
 
     var color = depth === 1 ? Defaultcolor : brown
-    var thickness = color === green ? thickness+0.8 : thickness
-    var length = color === green ? length-0.2 : length
+    var length = depth === 1 ? length : maxlength
     var offset = color === green ? 0.2 : 0
+    var thick = color === green ? 14*thickness : thickness
+
+
 
 
     var rightleaf = {
         f : [rotZ_wi(-rotation*3.14/180),translate_wi(0,length,offset)],
         o : [],
         c : [{
-            f : [ scaleXYZ_wi(thickness*depth/4, length, thickness*depth/4)],
+            f : [ scaleXYZ_wi(thick*depth/4, length, thick*depth/4)],
             o : [new Material(color),objBall],
             c : []
         }]
@@ -115,21 +119,21 @@ function drawLeaf(rotation, leaf, depth, length, thickness,t){
     if(depth === 1 && Defaultcolor === green && t >= 96){
         rightleaf.c.push(apple)
 }
-    
 
     var leftleaf = {
         f : [rotZ_wi(rotation*3.14/180),translate_wi(offset,length,0)],
         o : [],
         c : [{
-            f : [ scaleXYZ_wi(thickness*depth/4, length, thickness*thickness/4)],
+            f : [ scaleXYZ_wi(thick*depth/4, length, thick*depth/4)],
             o : [new Material(color),objBall],
             c : []
         }]
     }
 
+    
+    drawLeaf(rotation,leftleaf,depth-1,length,maxlength,thickness,t)
+    drawLeaf(rotation,rightleaf,depth-1,length,maxlength,thickness,t)
     leaf.c.push(leftleaf,rightleaf)
-    drawLeaf(rotation,leftleaf,depth-1,length,thickness,t)
-    drawLeaf(rotation,rightleaf,depth-1,length,thickness,t)
 
 }
 
@@ -137,12 +141,12 @@ function drawTree(t){
 
     var trunkHeight = 0
     var trunkThickness = 0
-    if(t > 32){
-    var trunkHeight = .066*(t-24) > 3 ? 3 : .066*(t-24);
-    var trunkThickness = .05*(t-24) > 1.75 ? 1.75 : .05*(t-24);
-    }
+    var growthFactor = t/4;
 
-    var growthFactor = t / 4;
+    if(t > 32){
+    var trunkHeight = .066*(t-24) > 3.25 ? 3.25 : .066*(t-24);
+    var trunkThickness = .05*(t-24) > 1.40 ? 1.40 : .05*(t-24);
+    }
 
     var puu = {
         f : [],
@@ -160,29 +164,27 @@ function drawTree(t){
         o : [new Material(brown),objTile],
         c : []
     }
-    
-        var rootThickness = 0.01*t > 0.1 ? 0.1 : .01*t;
-        var rootLength = 0.25*t > 1.75 ? 1.75 : 0.25*t;
-
-        var maxrootDepth = Math.floor(growthFactor) > 7 ? 7 : Math.floor(growthFactor);
-      
-
+        
         var roots = {f : [rotZ_wi(PI)], o : [], c : []};
-        Defaultcolor = brown;
-        drawLeaf(17.5,roots,maxrootDepth,rootLength,rootThickness,maxrootDepth);
-        
-        
         var leaves = {f : [], o : [], c : []};
-        var leafDepth = 1
-            
-        var leafgrowthfactor = t/5 - 7
-        var maxleafLength = leafgrowthfactor > 1.1 ? 1.1 : leafgrowthfactor
 
-        if(leafgrowthfactor > 0){
+        var rootThickness = 0.01*t > 0.1 ? 0.1 : .01*t;
+        var rootDepth = Math.floor(growthFactor) > 7 ? 7 : Math.floor(growthFactor)
+        var leafDepth = Math.floor(growthFactor)-6 > 9 ? 9 : Math.floor(growthFactor)-6
+
+        if(rootDepth > initdepth){
+            initdepth = rootDepth
+        }
+        len += 0.01;
+        len = len > maxlength ? maxlength : len
+        
+        Defaultcolor = brown;
+        drawLeaf(17.5,roots,initdepth,len,maxlength,rootThickness,t);
+
+        
+        if(t > 28){
             Defaultcolor = green;
-            leafDepth = Math.floor(leafgrowthfactor) > 9 ? 9 : Math.floor(leafgrowthfactor)
-            
-            drawLeaf(15,leaves,leafDepth,maxleafLength,0.07,t)
+            drawLeaf(15,leaves,leafDepth,len,maxlength,rootThickness/2,t)
         }
 
         puu.c.push(siemen);
@@ -193,16 +195,12 @@ function drawTree(t){
     return puu;
 }
 
-
-
 function basic_color(r,g,b){
     return [r/3, g/3, b/3, 0,
             r,   g,   b,   0,
             0,   0,   0,   1,
             0,   0,   0,   0]
 }
-
-
  
 function buildSceneAtTime(t){
 
@@ -237,15 +235,12 @@ function buildSceneAtTime(t){
                                c:[tausta]
                               },
                                 
-                              // The scene must have exactly one Camera. It doesn't work without.
-                              {f:[translate_wi(0,10,0), rotY_wi(0.2), translate_wi(0,0,45), rotX_wi(0.2)],
+                              {f:[translate_wi(0,10,0), translate_wi(0,0,45), rotX_wi(0.2)],
                                o:[],
                                c:[],
                                r:[new Camera()]
                               },
 
-                              // With "Vanilla 1.4" intro, the scene must have exactly one Light.
-                              // It doesn't work without.
                               {f:[translate_wi(9, 9, 0), scale_wi(.1)],
                                 o:[new Material(basic_color(9,9,9)), objTile],
                                 c:[],
@@ -258,7 +253,6 @@ function buildSceneAtTime(t){
                     if (t > 116){
                         return endroot
                     }
-                    // t 120 finishes song, so 116 could be good cutoff time
                     
     return sceneroot;
 }
